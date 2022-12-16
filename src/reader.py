@@ -1,5 +1,5 @@
-from oculus_reader.FPS_counter import FPSCounter
-from oculus_reader.buttons_parser import parse_buttons
+from FPS_counter import FPSCounter
+from buttons_parser import parse_buttons
 import numpy as np
 import threading
 import time
@@ -10,7 +10,7 @@ import sys
 def eprint(*args, **kwargs):
     RED = "\033[1;31m"  
     sys.stderr.write(RED)
-    print(*args, file=sys.stderr, **kwargs)
+    # print(*args, file=sys.stderr, **kwargs)
     RESET = "\033[0;0m"
     sys.stderr.write(RESET)
 
@@ -39,9 +39,6 @@ class OculusReader:
         self.install(verbose=False)
         if run:
             self.run()
-
-    def __del__(self):
-        self.stop()
 
     def run(self):
         self.running = True
@@ -200,11 +197,14 @@ class OculusReader:
 
 
 def main():
-    oculus_reader = OculusReader()
+    oculus_reader = OculusReader(ip_address='192.168.0.134', port=5555)
 
-    while True:
-        time.sleep(0.3)
-        print(oculus_reader.get_transformations_and_buttons())
+    try:
+        while True:
+            time.sleep(0.3)
+            print(oculus_reader.get_transformations_and_buttons())
+    except KeyboardInterrupt:
+        oculus_reader.stop()
 
 
 if __name__ == '__main__':

@@ -88,3 +88,9 @@ If you intend to use the precompiled APK with the predefined behavior, where the
 7. Provide the IP address when creating OculusReader object.
 8. Run the exemplary file: `python oculus_reader/reader.py`
 9. (optionally) If ROS is installed on your machine, the current transformation can be visualized using the script [visualize_oculus_transforms.py](oculus_reader/visualize_oculus_transforms.py).
+
+### WSL
+
+on windows: adb tcpip 5555
+find ip : adb shell ip route
+on wsl2: adb connect [ip device]:5555
