@@ -89,8 +89,26 @@ If you intend to use the precompiled APK with the predefined behavior, where the
 8. Run the exemplary file: `python oculus_reader/reader.py`
 9. (optionally) If ROS is installed on your machine, the current transformation can be visualized using the script [visualize_oculus_transforms.py](oculus_reader/visualize_oculus_transforms.py).
 
-### WSL
+### Connect To headset through WSL:
 
-on windows: adb tcpip 5555
-find ip : adb shell ip route
-on wsl2: adb connect [ip device]:5555
+1. Make sure that Oculus Quest is connected to the same network as the computer.
+2. Make sure you have installed ADB drivers on both Windows and WSL
+3. Connect Oculus Quest to PC with USB cable. This is required to establish the connection.
+4. Check connection on Windows with:
+```
+adb devices
+```
+4. On Windows, change port:
+```
+adb tcpip 5555
+```
+5. On Windows, check the IP address of the headset:  
+    `adb shell ip route`  
+    Expected output:  
+    `10.0.30.0/19 dev wlan0  proto kernel  scope link  **src **10.0.32.101`
+6. Read the IP address of the device standing after `**src`.
+7. On WSL, connect to the headset.
+```
+# On WSL!
+adb connect [ip address]:5555
+```
