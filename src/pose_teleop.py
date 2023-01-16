@@ -124,7 +124,7 @@ class GripperControl():
 def main():
     rospy.init_node('oculus_reader')
 
-    oculus_reader = OculusReader(ip_address='192.168.0.134' , port=5555)
+    oculus_reader = OculusReader()#ip_address='168.150.43.128' , port=5555)
     tf_manager = PoseManager()
     gripper_control = GripperControl()
     rate = rospy.Rate(125)
@@ -133,8 +133,11 @@ def main():
         while not rospy.is_shutdown():
             rate.sleep()
             transformations, buttons = oculus_reader.get_transformations_and_buttons()
+
             if 'r' not in transformations or 'A' not in buttons or 'rightTrig' not in buttons:
                 continue
+
+            print(buttons)
 
             right_controller_pose = transformations['r']
             pressed_A = buttons['A']

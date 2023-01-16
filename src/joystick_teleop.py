@@ -8,9 +8,9 @@ import geometry_msgs.msg
 def main():
     rospy.init_node('oculus_reader')
 
-    oculus_reader = OculusReader(ip_address='192.168.0.134' , port=5555)
+    oculus_reader = OculusReader()
     twist_pub = rospy.Publisher('/servo_server/cmd_vel', geometry_msgs.msg.TwistStamped, queue_size=1)
-    rate = rospy.Rate(60)
+    rate = rospy.Rate(500)
 
     try:
         while not rospy.is_shutdown():
@@ -18,6 +18,8 @@ def main():
             _, buttons = oculus_reader.get_transformations_and_buttons()
             if 'rightJS' not in buttons or 'rightTrig' not in buttons or 'rightGrip' not in buttons:
                 continue
+
+            print(buttons)
 
             right_js = buttons['rightJS']
             right_trigger = buttons['rightTrig']
@@ -27,7 +29,7 @@ def main():
             twist_stamped.header.stamp = rospy.Time.now()
             twist_stamped.twist.linear.x = right_js[1]
             twist_stamped.twist.linear.y = -right_js[0]
-            twist_stamped.twist.linear.z = right_trigger[0] - right_grip[0]
+            twist_stamped.twist.linear.z = (right_trigger[0] - right_grip[0])
             twist_stamped.twist.angular.x = 0 
             twist_stamped.twist.angular.y = 0 
             twist_stamped.twist.angular.z = 0
