@@ -1,18 +1,21 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 
 from reader import OculusReader
 from tf.transformations import euler_from_matrix, quaternion_from_matrix, euler_matrix, translation_matrix, quaternion_matrix, translation_from_matrix, quaternion_from_euler
 import rospy
 import tf
-import tf2_ros
 import geometry_msgs.msg
 import std_msgs.msg
 from scipy.spatial.transform import Rotation as R
 import numpy as np
-import timeit    
-import sys
 
 np.set_printoptions(formatter={'float': lambda x: "{:>8}".format("{0:0.3f}".format(x))})
+
+QUEUE_SIZE = 20
+ROSPY_RATE = 125
+# PUBLISHER = "/aubo_driver/ik_command"
+
+PUBLISHER = "/servo_server/target_pose"
 
 class PoseManager:
     def __init__(self):
@@ -24,7 +27,8 @@ class PoseManager:
         self.eef_ref_trans = None
         self.eef_ref_rot = None
 
-        self.pose_pub = rospy.Publisher('/servo_server/target_pose', geometry_msgs.msg.PoseStamped, queue_size=1)
+        self.pose_pub = rospy.Publisher(PUBLISHER, geometry_msgs.msg.PoseStamped, queue_size=QUEUE_SIZE)
+        # self.pose_pub = rospy.Publisher('/my_cartesian_motion_controller/target_frame', geometry_msgs.msg.PoseStamped, queue_size=QUEUE_SIZE)
 
     def publish_transform(self, transform, save_ref=False):
         trans = translation_from_matrix(transform)
@@ -107,6 +111,8 @@ class PoseManager:
         pose_stamped.pose.orientation.z = pose_rot[2]
         pose_stamped.pose.orientation.w = pose_rot[3]
 
+        print("Publishing", pose_stamped)
+
         self.pose_pub.publish(pose_stamped)
 
 
@@ -124,10 +130,10 @@ class GripperControl():
 def main():
     rospy.init_node('oculus_reader')
 
-    oculus_reader = OculusReader()#ip_address='168.150.43.128' , port=5555)
+    oculus_reader = OculusReader() #ip_address='168.150.43.128' , port=5555)
     tf_manager = PoseManager()
     gripper_control = GripperControl()
-    rate = rospy.Rate(125)
+    rate = rospy.Rate(ROSPY_RATE)
 
     try:
         while not rospy.is_shutdown():
@@ -137,15 +143,18 @@ def main():
             if 'r' not in transformations or 'A' not in buttons or 'rightTrig' not in buttons:
                 continue
 
-            print(buttons)
+            # print(buttons)
 
             right_controller_pose = transformations['r']
             pressed_A = buttons['A']
             rightTrig = buttons['rightTrig']
 
+            # print("[pressed_A]", pressed_A)
+            # print("[rightTrig]", rightTrig)
+
             tf_manager.publish_transform(right_controller_pose, save_ref=pressed_A)
             tf_manager.publish_pose()
-            gripper_control.publish_position(rightTrig[0] * 0.65)
+            # gripper_control.publish_position(rightTrig[0] * 0.65)
 
     except KeyboardInterrupt:
         print('Ctrl C: Stopping...')
@@ -157,37 +166,6 @@ def main():
 
 
 if __name__ == '__main__':
+    print("Running at rate", ROSPY_RATE, "and queue size", QUEUE_SIZE)
+    print("Publisher ", PUBLISHER)
     main()
-
-
-
-
-
-
-
-# class PoseToTwist:
-#     def __init__(self):
-#         self.last_lin_vec = None
-#         self.last_ang_vec = None
-#         self.last_time = None
-
-#     def get_twist(self, lin_vec, ang_vec):
-#         if not self.last_lin_vec or not self.last_ang_vec or not self.last_time:
-#             self.last_lin_vec = lin_vec
-#             self.last_ang_vec = ang_vec
-#             self.last_time = timeit.default_timer()
-#         else :
-#             delta_t = timeit.default_timer() - self.last_time
-#             lin_vel = geometry_msgs.msg.Vector3(
-#                 (lin_vec.position.x - self.last_lin_vec.position.x)/delta_t,
-#                 (lin_vec.position.y - self.last_lin_vec.position.y)/delta_t,
-#                 (lin_vec.position.z - self.last_lin_vec.position.z)/delta_t,
-#             )
-#             ang_vel = geometry_msgs.msg.Vector3(
-#                 (ang_vec.position.x - self.last_ang_vec.position.x)/delta_t,
-#                 (ang_vec.position.y - self.last_ang_vec.position.y)/delta_t,
-#                 (ang_vec.position.z - self.last_ang_vec.position.z)/delta_t,
-#             )
-
-
-#             self.last_time = timeit.default_timer()

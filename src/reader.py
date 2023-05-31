@@ -197,7 +197,7 @@ class OculusReader:
 
 
 def main():
-    oculus_reader = OculusReader(ip_address='192.168.0.134', port=5555)
+    oculus_reader = OculusReader()#ip_address='192.168.0.134', port=5555)
 
     try:
         while True:

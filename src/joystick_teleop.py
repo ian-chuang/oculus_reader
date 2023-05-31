@@ -10,7 +10,7 @@ def main():
 
     oculus_reader = OculusReader()
     twist_pub = rospy.Publisher('/servo_server/cmd_vel', geometry_msgs.msg.TwistStamped, queue_size=1)
-    rate = rospy.Rate(500)
+    rate = rospy.Rate(200)
 
     try:
         while not rospy.is_shutdown():
